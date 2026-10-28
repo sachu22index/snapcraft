@@ -290,10 +290,7 @@ export function ProductForm({ initialProduct, isEdit = false }: ProductFormProps
       const payload: AdminProduct = {
         ...currentProductData,
         status: targetStatus,
-        publishedAt:
-          targetStatus === "published"
-            ? initialProduct?.publishedAt || now
-            : null,
+        publishedAt: targetStatus === "published" ? initialProduct?.publishedAt || now : null,
         updatedAt: now,
       };
 

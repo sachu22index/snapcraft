@@ -179,8 +179,8 @@ export function CTASection() {
             >
               <MessageCircle size={17} />
               <span>Chat on WhatsApp</span>
-            </WhatsAppLink>11
-            
+            </WhatsAppLink>
+            11
           </div>
         </div>
       </div>

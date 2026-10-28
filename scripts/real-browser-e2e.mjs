@@ -68,8 +68,10 @@ async function runBrowserE2E() {
 
     console.log("   Waiting for authentication and redirect to admin dashboard...");
     await page.waitForFunction(
-      () => window.location.pathname.includes("/admin/dashboard") || window.location.pathname.includes("/admin/products"),
-      { timeout: 10000 }
+      () =>
+        window.location.pathname.includes("/admin/dashboard") ||
+        window.location.pathname.includes("/admin/products"),
+      { timeout: 10000 },
     );
     console.log("   ✅ Admin authenticated successfully. Current URL:", page.url());
 
@@ -92,9 +94,12 @@ async function runBrowserE2E() {
     if (preExisting) {
       console.log("   Found leftover product from earlier test. Cleaning up before test run...");
       try {
-        const confirmDeleteBtn = await page.waitForSelector("xpath///button[contains(., 'Yes, Delete Product')]", {
-          timeout: 4000,
-        });
+        const confirmDeleteBtn = await page.waitForSelector(
+          "xpath///button[contains(., 'Yes, Delete Product')]",
+          {
+            timeout: 4000,
+          },
+        );
         if (confirmDeleteBtn) await confirmDeleteBtn.click();
         await new Promise((r) => setTimeout(r, 1000));
       } catch {}
@@ -120,7 +125,9 @@ async function runBrowserE2E() {
     // STEP 3: Switch to Pricing tab and enter price
     // -------------------------------------------------------------------------
     console.log("\n👉 Step 3: Configuring Pricing & Inclusions...");
-    const pricingTabBtn = await page.waitForSelector("xpath///button[contains(., 'Pricing')]", { timeout: 5000 });
+    const pricingTabBtn = await page.waitForSelector("xpath///button[contains(., 'Pricing')]", {
+      timeout: 5000,
+    });
     await pricingTabBtn.click();
     await page.waitForSelector('input[placeholder="2499"]', { timeout: 5000 });
     await page.type('input[placeholder="2499"]', "4999");
@@ -129,7 +136,10 @@ async function runBrowserE2E() {
     const inclusionInput = await page.$('input[placeholder*="18 Stem"]');
     if (inclusionInput) {
       await inclusionInput.type("Handcrafted Brass Trinket Box");
-      const addInclusionBtn = await page.waitForSelector("xpath///button[contains(., 'Add Item')]", { timeout: 5000 });
+      const addInclusionBtn = await page.waitForSelector(
+        "xpath///button[contains(., 'Add Item')]",
+        { timeout: 5000 },
+      );
       await addInclusionBtn.click();
     }
 
@@ -137,7 +147,9 @@ async function runBrowserE2E() {
     // STEP 4: Switch to Media tab and upload real image
     // -------------------------------------------------------------------------
     console.log("\n👉 Step 4: Uploading real image through Media Uploader...");
-    const mediaTabBtn = await page.waitForSelector("xpath///button[contains(., 'Media')]", { timeout: 5000 });
+    const mediaTabBtn = await page.waitForSelector("xpath///button[contains(., 'Media')]", {
+      timeout: 5000,
+    });
     await mediaTabBtn.click();
 
     await page.waitForSelector('input[type="file"]', { timeout: 5000 });
@@ -148,15 +160,15 @@ async function runBrowserE2E() {
     // Wait for upload progress to finish and preview to appear
     await page.waitForFunction(
       () => {
-        const previewImgs = document.querySelectorAll('.aspect-square img, .relative img');
+        const previewImgs = document.querySelectorAll(".aspect-square img, .relative img");
         return previewImgs.length > 0;
       },
-      { timeout: 10000 }
+      { timeout: 10000 },
     );
 
     // Retrieve uploaded image URL from DOM
     const uploadedUrlInDOM = await page.evaluate(() => {
-      const img = document.querySelector('.aspect-square img, .relative img');
+      const img = document.querySelector(".aspect-square img, .relative img");
       return img ? img.src : null;
     });
     console.log("   ✅ Uploaded Image URL in DOM:", uploadedUrlInDOM?.slice(0, 60) + "...");
@@ -165,14 +177,15 @@ async function runBrowserE2E() {
     // STEP 5: Save Product as Draft
     // -------------------------------------------------------------------------
     console.log("\n👉 Step 5: Saving product as 'Draft'...");
-    const draftBtn = await page.waitForSelector("xpath///button[contains(., 'Save as Draft')]", { timeout: 5000 });
+    const draftBtn = await page.waitForSelector("xpath///button[contains(., 'Save as Draft')]", {
+      timeout: 5000,
+    });
     await draftBtn.click();
 
     // Wait for redirect to /admin/products
-    await page.waitForFunction(
-      () => window.location.pathname.endsWith("/admin/products"),
-      { timeout: 10000 }
-    );
+    await page.waitForFunction(() => window.location.pathname.endsWith("/admin/products"), {
+      timeout: 10000,
+    });
     console.log("   ✅ Successfully saved as draft and redirected to products table.");
 
     // Verify product is listed with Draft status
@@ -182,7 +195,10 @@ async function runBrowserE2E() {
       const match = rows.find((r) => r.textContent.includes(prodName));
       return match ? match.textContent.includes("Draft") : false;
     }, TEST_PRODUCT_NAME);
-    console.log("   ✅ Product row verified with Draft status in Admin Table:", draftStatusVerified);
+    console.log(
+      "   ✅ Product row verified with Draft status in Admin Table:",
+      draftStatusVerified,
+    );
 
     // -------------------------------------------------------------------------
     // STEP 6: Refresh the application and verify persistence
@@ -203,7 +219,10 @@ async function runBrowserE2E() {
     }, TEST_PRODUCT_NAME);
 
     console.log("   ✅ Product persisted in table after full page reload:", persistedRow?.found);
-    console.log("   ✅ Thumbnail persisted correctly:", persistedRow?.thumbSrc?.slice(0, 60) + "...");
+    console.log(
+      "   ✅ Thumbnail persisted correctly:",
+      persistedRow?.thumbSrc?.slice(0, 60) + "...",
+    );
 
     // -------------------------------------------------------------------------
     // STEP 7: Reopen product in Edit mode
@@ -221,10 +240,7 @@ async function runBrowserE2E() {
       throw new Error("Edit button not found for test product");
     }
 
-    await page.waitForFunction(
-      () => window.location.pathname.includes("/edit"),
-      { timeout: 8000 }
-    );
+    await page.waitForFunction(() => window.location.pathname.includes("/edit"), { timeout: 8000 });
     console.log("   ✅ Reopened Edit Product URL:", page.url());
 
     // Verify form fields populated
@@ -235,19 +251,23 @@ async function runBrowserE2E() {
     // STEP 8: Publish Product
     // -------------------------------------------------------------------------
     console.log("\n👉 Step 8: Publishing product to public storefront...");
-    const publishBtn = await page.waitForSelector("xpath///button[contains(., 'Publish Product')]", { timeout: 5000 });
+    const publishBtn = await page.waitForSelector(
+      "xpath///button[contains(., 'Publish Product')]",
+      { timeout: 5000 },
+    );
     await publishBtn.click();
 
-    await page.waitForFunction(
-      () => window.location.pathname.endsWith("/admin/products"),
-      { timeout: 10000 }
-    );
+    await page.waitForFunction(() => window.location.pathname.endsWith("/admin/products"), {
+      timeout: 10000,
+    });
     console.log("   ✅ Product published and redirected back to admin table.");
 
     // -------------------------------------------------------------------------
     // STEP 9: Verify Rendering on Public Website
     // -------------------------------------------------------------------------
-    console.log("\n👉 Step 9: Opening Public Hampers Storefront (http://localhost:8080/hampers)...");
+    console.log(
+      "\n👉 Step 9: Opening Public Hampers Storefront (http://localhost:8080/hampers)...",
+    );
     await page.goto(`${BASE_URL}/hampers`, { waitUntil: "networkidle0" });
 
     // Wait for product cards
@@ -280,7 +300,9 @@ async function runBrowserE2E() {
     // -------------------------------------------------------------------------
     // STEP 10: Verify Product Detail Page
     // -------------------------------------------------------------------------
-    console.log("\n👉 Step 10: Navigating directly to Product Detail Page (/products/e2e-royal-artisan-brass-hamper)...");
+    console.log(
+      "\n👉 Step 10: Navigating directly to Product Detail Page (/products/e2e-royal-artisan-brass-hamper)...",
+    );
     await page.goto(`${BASE_URL}/products/${TEST_PRODUCT_SLUG}`, { waitUntil: "networkidle0" });
 
     const detailPageData = await page.evaluate(() => {
@@ -315,7 +337,9 @@ async function runBrowserE2E() {
       const match = rows.find((r) => r.textContent.includes(prodName));
       if (!match) return false;
       // Find delete button
-      const deleteBtn = match.querySelector('button[title*="Delete"], button.text-rose-600, button:has(svg.lucide-trash2), button:has(svg.lucide-trash-2)');
+      const deleteBtn = match.querySelector(
+        'button[title*="Delete"], button.text-rose-600, button:has(svg.lucide-trash2), button:has(svg.lucide-trash-2)',
+      );
       if (deleteBtn) {
         deleteBtn.click();
         return true;
@@ -324,10 +348,15 @@ async function runBrowserE2E() {
     }, TEST_PRODUCT_NAME);
 
     if (deleteSuccess) {
-      console.log("   Delete button clicked on test product row. Waiting for confirmation modal...");
-      const confirmDeleteBtn = await page.waitForSelector("xpath///button[contains(., 'Yes, Delete Product')]", {
-        timeout: 5000,
-      });
+      console.log(
+        "   Delete button clicked on test product row. Waiting for confirmation modal...",
+      );
+      const confirmDeleteBtn = await page.waitForSelector(
+        "xpath///button[contains(., 'Yes, Delete Product')]",
+        {
+          timeout: 5000,
+        },
+      );
       if (confirmDeleteBtn) {
         await confirmDeleteBtn.click();
         console.log("   ✅ 'Yes, Delete Product' confirmed.");
@@ -348,11 +377,19 @@ async function runBrowserE2E() {
     const publicCardCount = await page.evaluate(() => {
       return document.querySelectorAll(".snapcraft-product-card").length;
     });
-    console.log("   ✅ Public catalogue still preserves all production products:", publicCardCount, "items listed.");
+    console.log(
+      "   ✅ Public catalogue still preserves all production products:",
+      publicCardCount,
+      "items listed.",
+    );
 
-    console.log("\n================================================================================");
+    console.log(
+      "\n================================================================================",
+    );
     console.log("🎉 ALL REAL END-TO-END BROWSER WORKFLOW TESTS PASSED 100%!");
-    console.log("================================================================================\n");
+    console.log(
+      "================================================================================\n",
+    );
   } catch (err) {
     console.error("\n❌ BROWSER E2E TEST FAILED:", err);
     process.exitCode = 1;

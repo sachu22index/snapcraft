@@ -156,7 +156,6 @@ if (typeof window !== "undefined") {
 // -----------------------------------------------------------------------------
 let cachedProducts: AdminProduct[] | null = null;
 let cachedCategories: Category[] | null = null;
-let isHydrating = false;
 
 // Safe localStorage write that strips massive binary strings to avoid 5MB quota errors
 function safeSaveLocalStorage(key: string, data: unknown) {
@@ -168,7 +167,9 @@ function safeSaveLocalStorage(key: string, data: unknown) {
       localStorage.setItem(key, serialized);
     }
   } catch (err) {
-    console.warn(`LocalStorage quota reached for key "${key}". Data safely preserved in IndexedDB.`);
+    console.warn(
+      `LocalStorage quota reached for key "${key}". Data safely preserved in IndexedDB.`,
+    );
   }
 }
 
@@ -547,7 +548,9 @@ export async function createProduct(
   input: Omit<AdminProduct, "id" | "createdAt" | "updatedAt">,
 ): Promise<AdminProduct> {
   const now = new Date().toISOString();
-  const id = input.slug ? generateSlug(input.slug) : generateSlug(input.name) || `prod-${Date.now()}`;
+  const id = input.slug
+    ? generateSlug(input.slug)
+    : generateSlug(input.name) || `prod-${Date.now()}`;
 
   const newProduct: AdminProduct = {
     ...input,
@@ -574,7 +577,9 @@ export async function createProduct(
   const items = await getStoredProducts();
 
   // Handle unique slug / sku collision
-  const existingIndex = items.findIndex((p) => p.slug === newProduct.slug || p.id === newProduct.id);
+  const existingIndex = items.findIndex(
+    (p) => p.slug === newProduct.slug || p.id === newProduct.id,
+  );
   if (existingIndex !== -1) {
     newProduct.slug = `${newProduct.slug}-${Date.now().toString().slice(-4)}`;
     newProduct.id = newProduct.slug;
@@ -696,7 +701,12 @@ export async function getCategories(): Promise<Category[]> {
 
 export async function createCategory(cat: Omit<Category, "displayOrder">): Promise<Category> {
   const categories = await getCategories();
-  const catName = cat.name || (cat as any).label || cat.id || "Category";
+  const catRecord = cat as unknown as Record<string, unknown>;
+  const catName =
+    cat.name ||
+    (typeof catRecord["label"] === "string" ? catRecord["label"] : "") ||
+    cat.id ||
+    "Category";
   const newCat: Category = {
     ...cat,
     name: catName,
